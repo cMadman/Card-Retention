@@ -15,24 +15,24 @@ function load() {
     initialise();
 }
 
-function calculateCard(input) {
+function calculateCard(i) {
   let cardWidth =
     (
-      input.width -
+      i.width -
         (
-          (input.columns * input.margin) + input.margin
+          (i.columns * i.margin) + i.margin
         )
     )
-    / input.columns;
+    / i.columns;
 
     let cardHeight =
       (
-        input.height -
+        i.height -
           (
-            (input.rows * input.margin) + input.margin
+            (i.rows * i.margin) + i.margin
           )
       )
-      / input.rows;
+      / i.rows;
 
       return {
         width: cardWidth,

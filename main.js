@@ -1,17 +1,11 @@
-// object definitions
-let tick;
-let deck = [];
-let deckMargin = 20;
-let deckColumns = 5;
-let deckRows = 5;
-
-// frame
-let frame = false;
-let frameHeight = 500;
-let frameWidth = 500;
-let frameLeft = Math.ceil((window.innerWidth / 2) - (frameWidth / 2));
-let frameRight = frameLeft + frameWidth;
-let frameTop = 100;
+const DECK_MARGIN = 20;
+const DECK_COLUMNS = 5;
+const DECK_ROWS = 5;
+const FRAME_HEIGHT = 500;
+const FRAME_WIDTH = 500;
+const FRAME_LEFT = Math.ceil((window.innerWidth / 2) - (FRAME_WIDTH / 2));
+const FRAME_RIGHT = FRAME_LEFT + FRAME_WIDTH;
+const FRAME_TOP = 100;
 
 // initialisation
 window.onload = load;
@@ -21,24 +15,24 @@ function load() {
     initialise();
 }
 
-function calculateCard(deckWidth,deckHeight,deckMargin,deckColumns,deckRows) {
+function calculateCard(input) {
   let cardWidth =
     (
-      deckWidth -
+      input.width -
         (
-          (deckColumns * deckMargin) + deckMargin
+          (input.columns * input.margin) + input.margin
         )
     )
-    / deckColumns;
+    / input.columns;
 
     let cardHeight =
       (
-        deckHeight -
+        input.height -
           (
-            (deckRows * deckMargin) + deckMargin
+            (input.rows * input.margin) + input.margin
           )
       )
-      / deckRows;
+      / input.rows;
 
       return {
         width: cardWidth,
@@ -46,53 +40,53 @@ function calculateCard(deckWidth,deckHeight,deckMargin,deckColumns,deckRows) {
       }
 }
 
-function newElement(type,top,left,width,height,zIndex,backgroundColor) {
-  let nE = document.createElement(type);
-  nE.style.height = height;
-  nE.style.left = left;
-  nE.style.position = 'absolute';
-  nE.style.top = top;
-  nE.style.width = width;
+function createCard(top,left,width,height) {
+  let card = document.createElement('div');
+  card.className = 'flip-container';
+  card.style.height = height;
+  card.style.left = left;
+  card.style.position = 'absolute';
+  card.style.top = top;
+  card.style.width = width;
 
-  return nE;
+  card.innerHTML = `
+    <div class="flipper">
+      <div class="front">front</div>
+      <div class="back">back</div>
+    </div>
+  `;
+
+  return card;
 }
 
-function prepareDeck(containerTop, containerLeft, columns, rows, cardWidth, cardHeight, deckMargin) {
+function prepareDeck(i) {
   let pointer = {
-    left: containerLeft + deckMargin,
-    top: containerTop + deckMargin
+    left: i.left + i.margin,
+    top: i.top + i.margin
   }
 
-  for (row = 0; row < rows; row++) {
+  let deck = [];
+
+  for (row = 0; row < i.rows; row++) {
     deck[row] = [];
 
-    for (col = 0; col < columns; col++) {
-      deck[row][col] = newElement(
-        'div',
-        pointer.top,
-        pointer.left,
-        cardWidth,
-        cardHeight
+    for (col = 0; col < i.columns; col++) {
+      deck[row][col] = createCard(pointer.top,pointer.left,i.cardWidth,i.cardHeight
       );
-      deck[row][col].className = 'flip-container';
-      deck[row][col].innerHTML = `
-        <div class="flipper">
-          <div class="front">front</div>
-          <div class="back">back</div>
-        </div>
-      `;
 
-      pointer.left = pointer.left + cardWidth + deckMargin;
+      pointer.left = pointer.left + i.cardWidth + i.margin;
     }
 
-    pointer.left = containerLeft + deckMargin;
-    pointer.top = pointer.top + cardHeight + deckMargin;
+    pointer.left = i.left + i.margin;
+    pointer.top = pointer.top + i.cardHeight + i.margin;
   }
+
+  return deck;
 }
 
 function renderDeck(container,deck) {
-  deck.forEach(function(row){
-    row.forEach(function(column){
+  deck.forEach(function(row) {
+    row.forEach(function(column) {
       container.appendChild(column);
     });
   });
@@ -100,17 +94,34 @@ function renderDeck(container,deck) {
 
 function initialise() {
     // canvas
-    frame = document.createElement('div');
+
+    let card = calculateCard({
+      width: FRAME_WIDTH,
+      height: FRAME_HEIGHT,
+      margin: DECK_MARGIN,
+      columns: DECK_COLUMNS,
+      rows: DECK_ROWS
+    });
+
+    let deck = prepareDeck({
+      left: 0,
+      top: 0,
+      columns: DECK_COLUMNS,
+      rows: DECK_ROWS,
+      cardWidth: card.width,
+      cardHeight: card.height,
+      margin: DECK_MARGIN
+    });
+
+    let frame = document.createElement('div');
     frame.style.position = 'absolute';
-    frame.style.top = frameTop;
-    frame.style.left = frameLeft;
-    frame.style.height = frameHeight;
-    frame.style.width = frameWidth;
+    frame.style.top = FRAME_TOP;
+    frame.style.left = FRAME_LEFT;
+    frame.style.height = FRAME_HEIGHT;
+    frame.style.width = FRAME_WIDTH;
     frame.style.backgroundColor = '#eee';
     frame.style.zIndex = 0;
     document.body.appendChild(frame);
 
-    let card = calculateCard(frameWidth,frameHeight,deckMargin,deckColumns,deckRows);
-    prepareDeck(0,0,deckColumns,deckRows,card.width,card.height,deckMargin);
     renderDeck(frame,deck);
 }

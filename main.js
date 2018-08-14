@@ -7,8 +7,12 @@ const FRAME_WIDTH = 500;
 const FRAME_LEFT = Math.ceil((window.innerWidth / 2) - (FRAME_WIDTH / 2));
 const FRAME_RIGHT = FRAME_LEFT + FRAME_WIDTH;
 const FRAME_TOP = 100;
-const CARD_CONTENT = ['🍌','🍉','🍇','🍓','🍒','🍑','🍍','🥥','🥝','🍆','🥑','🥦','🌽','🥕','🍠'];
+const CARD_CONTENT = ["🍌","🍉","🍇","🍓","🍒","🍑","🍍","🥥","🥝","🍆","🥑","🥦","🌽","🥕","🍠"];
 const MAXIMUM_CARDS = CARD_CONTENT.length * 2;
+const REQUIRED_CONTENT = CARD_CONTENT.slice(0,(NUMBER_OF_CARDS/2));
+const DECK = REQUIRED_CONTENT.reduce(function (res, current, index, array) {
+  return res.concat([current, current]);
+}, []);
 
 if(isOdd(DECK_COLUMNS) && isOdd(DECK_ROWS)) {
   exit("Exit: Deck must be even, therefore rows and columns cannot both be odd.");
@@ -25,8 +29,6 @@ window.onload = load;
 function load() {
     initialise();
 }
-
-function isOdd(num) { return num % 2; }
 
 function calculateCard(i) {
   let cardWidth =
@@ -53,7 +55,7 @@ function calculateCard(i) {
       }
 }
 
-function createCard(top,left,width,height) {
+function createCard(top,left,width,height,back) {
   let card = document.createElement('div');
   card.className = 'flip-container';
   card.style.height = height;
@@ -64,8 +66,8 @@ function createCard(top,left,width,height) {
 
   card.innerHTML = `
     <div class="flipper">
-      <div class="front">front</div>
-      <div class="back">back</div>
+      <div class="front"></div>
+      <div class="back">${back}</div>
     </div>
   `;
 
@@ -80,11 +82,14 @@ function prepareDeck(i) {
 
   let deck = [];
 
+  let deckContent = DECK;
+  shuffle(deckContent);
+
   for (row = 0; row < i.rows; row++) {
     deck[row] = [];
 
     for (col = 0; col < i.columns; col++) {
-      deck[row][col] = createCard(pointer.top,pointer.left,i.cardWidth,i.cardHeight);
+      deck[row][col] = createCard(pointer.top,pointer.left,i.cardWidth,i.cardHeight,deckContent.pop());
 
       pointer.left = pointer.left + i.cardWidth + i.margin;
     }
@@ -134,6 +139,24 @@ function initialise() {
     document.body.appendChild(frame);
 
     renderDeck(frame,deck);
+}
+
+/* third-party code */
+
+// source: https://stackoverflow.com/questions/5016313/how-to-determine-if-a-number-is-odd-in-javascript
+function isOdd(num) { return num % 2; }
+
+/**
+ * source: https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array
+ * Shuffles array in place. ES6 version
+ * @param {Array} a items An array containing the items.
+ */
+function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
 }
 
 function exit( status ) {

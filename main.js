@@ -1,15 +1,21 @@
 const DECK_MARGIN = 20;
 const DECK_COLUMNS = 4;
 const DECK_ROWS = 4;
+const NUMBER_OF_CARDS = DECK_COLUMNS * DECK_ROWS;
 const FRAME_HEIGHT = 500;
 const FRAME_WIDTH = 500;
 const FRAME_LEFT = Math.ceil((window.innerWidth / 2) - (FRAME_WIDTH / 2));
 const FRAME_RIGHT = FRAME_LEFT + FRAME_WIDTH;
 const FRAME_TOP = 100;
+const CARD_CONTENT = ['🍌','🍉','🍇','🍓','🍒','🍑','🍍','🥥','🥝','🍆','🥑','🥦','🌽','🥕','🍠'];
+const MAXIMUM_CARDS = CARD_CONTENT.length * 2;
 
-if(isOdd(DECK_COLUMNS) && isOdd(DECK_ROWS))
-{
+if(isOdd(DECK_COLUMNS) && isOdd(DECK_ROWS)) {
   exit("Exit: Deck must be even, therefore rows and columns cannot both be odd.");
+}
+
+if(NUMBER_OF_CARDS > MAXIMUM_CARDS) {
+  exit("Exit: Not enough icons.");
 }
 
 // initialisation
@@ -131,6 +137,7 @@ function initialise() {
 }
 
 function exit( status ) {
+    // source: https://stackoverflow.com/questions/550574/how-to-terminate-the-script-in-javascript
     // http://kevin.vanzonneveld.net
     // +   original by: Brett Zamir (http://brettz9.blogspot.com)
     // +      input by: Paul

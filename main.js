@@ -48,13 +48,11 @@ function calculateCard(deckWidth,deckHeight,deckMargin,deckColumns,deckRows) {
 
 function newElement(type,top,left,width,height,zIndex,backgroundColor) {
   let nE = document.createElement(type);
-  nE.style.backgroundColor = (backgroundColor ? backgroundColor : '#f00');
   nE.style.height = height;
   nE.style.left = left;
   nE.style.position = 'absolute';
   nE.style.top = top;
   nE.style.width = width;
-  nE.style.zIndex = (zIndex ? zIndex : 0);
 
   return nE;
 }
@@ -74,9 +72,15 @@ function prepareDeck(containerTop, containerLeft, columns, rows, cardWidth, card
         pointer.top,
         pointer.left,
         cardWidth,
-        cardHeight,
-        1
+        cardHeight
       );
+      deck[row][col].className = 'flip-container';
+      deck[row][col].innerHTML = `
+        <div class="flipper">
+          <div class="front">front</div>
+          <div class="back">back</div>
+        </div>
+      `;
 
       pointer.left = pointer.left + cardWidth + deckMargin;
     }
@@ -86,10 +90,10 @@ function prepareDeck(containerTop, containerLeft, columns, rows, cardWidth, card
   }
 }
 
-function renderDeck(deck) {
+function renderDeck(container,deck) {
   deck.forEach(function(row){
     row.forEach(function(column){
-      document.body.appendChild(column);
+      container.appendChild(column);
     });
   });
 }
@@ -107,6 +111,6 @@ function initialise() {
     document.body.appendChild(frame);
 
     let card = calculateCard(frameWidth,frameHeight,deckMargin,deckColumns,deckRows);
-    prepareDeck(frameTop,frameLeft,deckColumns,deckRows,card.width,card.height,deckMargin);
-    renderDeck(deck);
+    prepareDeck(0,0,deckColumns,deckRows,card.width,card.height,deckMargin);
+    renderDeck(frame,deck);
 }

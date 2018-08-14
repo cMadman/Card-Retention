@@ -93,8 +93,6 @@ function renderDeck(container,deck) {
 }
 
 function initialise() {
-    // canvas
-
     let card = calculateCard({
       width: FRAME_WIDTH,
       height: FRAME_HEIGHT,

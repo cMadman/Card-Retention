@@ -15,11 +15,11 @@ const DECK = REQUIRED_CONTENT.reduce(function (res, current, index, array) {
 }, []);
 
 if(isOdd(DECK_COLUMNS) && isOdd(DECK_ROWS)) {
-  exit("Exit: Deck must be even, therefore rows and columns cannot both be odd.");
+  throw new Error("Deck must be even, therefore rows and columns cannot both be odd.");
 }
 
 if(NUMBER_OF_CARDS > MAXIMUM_CARDS) {
-  exit("Exit: Not enough icons.");
+  throw new Error("Not enough icons.");
 }
 
 // initialisation
@@ -30,24 +30,24 @@ function load() {
     initialise();
 }
 
-function calculateCard(i) {
+function calculateCard(options) {
   let cardWidth =
     (
-      i.width -
+      options.width -
         (
-          (i.columns * i.margin) + i.margin
+          (options.columns * options.margin) + options.margin
         )
     )
-    / i.columns;
+    / options.columns;
 
     let cardHeight =
       (
-        i.height -
+        options.height -
           (
-            (i.rows * i.margin) + i.margin
+            (options.rows * options.margin) + options.margin
           )
       )
-      / i.rows;
+      / options.rows;
 
       return {
         width: cardWidth,
@@ -63,6 +63,7 @@ function createCard(top,left,width,height,back) {
   card.style.position = 'absolute';
   card.style.top = top;
   card.style.width = width;
+  card.addEventListener('click', cardClick);
 
   card.innerHTML = `
     <div class="flipper">
@@ -74,28 +75,30 @@ function createCard(top,left,width,height,back) {
   return card;
 }
 
-function prepareDeck(i) {
+function cardClick() {
+  this.classList.toggle("flip");
+}
+
+function prepareDeck(options) {
   let pointer = {
-    left: i.left + i.margin,
-    top: i.top + i.margin
+    left: options.left + options.margin,
+    top: options.top + options.margin
   }
 
   let deck = [];
+  let deckContent = _.shuffle(DECK);
 
-  let deckContent = DECK;
-  shuffle(deckContent);
-
-  for (row = 0; row < i.rows; row++) {
+  for (row = 0; row < options.rows; row++) {
     deck[row] = [];
 
-    for (col = 0; col < i.columns; col++) {
-      deck[row][col] = createCard(pointer.top,pointer.left,i.cardWidth,i.cardHeight,deckContent.pop());
+    for (col = 0; col < options.columns; col++) {
+      deck[row][col] = createCard(pointer.top,pointer.left,options.cardWidth,options.cardHeight,deckContent.pop());
 
-      pointer.left = pointer.left + i.cardWidth + i.margin;
+      pointer.left = pointer.left + options.cardWidth + options.margin;
     }
 
-    pointer.left = i.left + i.margin;
-    pointer.top = pointer.top + i.cardHeight + i.margin;
+    pointer.left = options.left + options.margin;
+    pointer.top = pointer.top + options.cardHeight + options.margin;
   }
 
   return deck;
@@ -145,58 +148,3 @@ function initialise() {
 
 // source: https://stackoverflow.com/questions/5016313/how-to-determine-if-a-number-is-odd-in-javascript
 function isOdd(num) { return num % 2; }
-
-/**
- * source: https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array
- * Shuffles array in place. ES6 version
- * @param {Array} a items An array containing the items.
- */
-function shuffle(a) {
-    for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-}
-
-function exit( status ) {
-    // source: https://stackoverflow.com/questions/550574/how-to-terminate-the-script-in-javascript
-    // http://kevin.vanzonneveld.net
-    // +   original by: Brett Zamir (http://brettz9.blogspot.com)
-    // +      input by: Paul
-    // +   bugfixed by: Hyam Singer (http://www.impact-computing.com/)
-    // +   improved by: Philip Peterson
-    // +   bugfixed by: Brett Zamir (http://brettz9.blogspot.com)
-    // %        note 1: Should be considered expirimental. Please comment on this function.
-    // *     example 1: exit();
-    // *     returns 1: null
-
-    var i;
-
-    if (typeof status === 'string') {
-        alert(status);
-    }
-
-    window.addEventListener('error', function (e) {e.preventDefault();e.stopPropagation();}, false);
-
-    var handlers = [
-        'copy', 'cut', 'paste',
-        'beforeunload', 'blur', 'change', 'click', 'contextmenu', 'dblclick', 'focus', 'keydown', 'keypress', 'keyup', 'mousedown', 'mousemove', 'mouseout', 'mouseover', 'mouseup', 'resize', 'scroll',
-        'DOMNodeInserted', 'DOMNodeRemoved', 'DOMNodeRemovedFromDocument', 'DOMNodeInsertedIntoDocument', 'DOMAttrModified', 'DOMCharacterDataModified', 'DOMElementNameChanged', 'DOMAttributeNameChanged', 'DOMActivate', 'DOMFocusIn', 'DOMFocusOut', 'online', 'offline', 'textInput',
-        'abort', 'close', 'dragdrop', 'load', 'paint', 'reset', 'select', 'submit', 'unload'
-    ];
-
-    function stopPropagation (e) {
-        e.stopPropagation();
-        // e.preventDefault(); // Stop for the form controls, etc., too?
-    }
-    for (i=0; i < handlers.length; i++) {
-        window.addEventListener(handlers[i], function (e) {stopPropagation(e);}, true);
-    }
-
-    if (window.stop) {
-        window.stop();
-    }
-
-    throw '';
-}

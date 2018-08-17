@@ -1,5 +1,3 @@
-import * as _ from "lodash";
-
 // initialisation
 window.onload = load;
 
@@ -14,7 +12,7 @@ function initialise() {
   ];
 
   let game = new Game(players,"Mark","Easy",500,500);
-  game.createBoard;
+  game.createBoard();
 }
 
 class Game {
@@ -83,6 +81,20 @@ class Deck {
           }, []);
 
         // shuffle
-        this.cards = _.shuffle(this.cards);
+        shuffle(this.cards);
     }
+}
+
+// third party code
+/**
+  * source: https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array
+  * Shuffles array in place. ES6 version
+  * @param {Array} a items An array containing the items.
+  */
+ function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
 }

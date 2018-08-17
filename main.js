@@ -1,6 +1,3 @@
-"use strict";
-exports.__esModule = true;
-var _ = require("lodash");
 // initialisation
 window.onload = load;
 // system functions
@@ -12,7 +9,7 @@ function initialise() {
         new Player("Mark")
     ];
     var game = new Game(players, "Mark", "Easy", 500, 500);
-    game.createBoard;
+    game.createBoard();
 }
 var Game = /** @class */ (function () {
     function Game(players, currentPlayer, difficulty, width, height) {
@@ -60,7 +57,21 @@ var Deck = /** @class */ (function () {
             return res.concat([current, current]);
         }, []);
         // shuffle
-        this.cards = _.shuffle(this.cards);
+        shuffle(this.cards);
     }
     return Deck;
 }());
+// third party code
+/**
+  * source: https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array
+  * Shuffles array in place. ES6 version
+  * @param {Array} a items An array containing the items.
+  */
+function shuffle(a) {
+    var _a;
+    for (var i = a.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        _a = [a[j], a[i]], a[i] = _a[0], a[j] = _a[1];
+    }
+    return a;
+}

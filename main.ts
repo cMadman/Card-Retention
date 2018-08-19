@@ -8,12 +8,11 @@ function load() {
 
 function initialise() {
   let players = [
-    new Player("Mark")
+    new Player("Mark"),
+    new Player("Ste")
   ];
 
-  let game = new Game(players,"Mark","Easy");
-  game.createBoard();
-  game.deal();
+  let game = new Game(players,0,"Medium");
 }
 
 class Game {
@@ -23,6 +22,7 @@ class Game {
     totalCards: number;
     board: any;
     aCard: any;
+    playerZone: any;
 
     width = 500;
     height = 500;
@@ -34,14 +34,29 @@ class Game {
 
     constructor(
         public players: Array<any>, 
-        public currentPlayer: string, 
+        public currentPlayer: number, 
         public difficulty: string
     ) {
+        switch(difficulty) {
+            case "Hard":
+                this.rows = 8;
+                this.columns = 8;
+                break;
+            case "Medium":
+                this.rows = 6;
+                this.columns = 6;
+                break;
+            case "Easy":
+            default:
+                this.rows = 4;
+                this.columns = 4;
+            break;
+        }
         if(difficulty == "Easy") {
             this.rows = 4;
             this.columns = 4;
-            this.totalCards = this.rows * this.columns;
         }
+        this.totalCards = this.rows * this.columns;
         this.aCard = Card.calculateCard({
             width: this.width,
             height: this.height,
@@ -49,6 +64,10 @@ class Game {
             columns: this.columns,
             rows: this.rows
         });
+
+        this.createBoard();
+        this.createPlayerZone();
+        this.deal();
     }
 
     createBoard() {
@@ -67,7 +86,7 @@ class Game {
 
     deal() {
         let cards = [
-            "🍌","🍉","🍇","🍓","🍒","🍑","🍍","🥥","🥝","🍆","🥑","🥦","🌽","🥕","🍠"
+            "🍌","🍉","🍇","🍓","🍒","🍑","🍍","🥥","🥝","🍆","🥑","🥦","🌽","🥕","🍠","🍔","🍟","🍕","🌮","🥗","🍣","🍭","🍩","🍿"
         ]
         this.deck = new Deck(cards,this.totalCards);
         
@@ -96,9 +115,9 @@ class Game {
             pointer.top = pointer.top + this.aCard.height + this.margin;
           }
 
-        this.tableau.forEach(function(row) {
-            row.forEach(function(card) {
-                document.getElementById("game-board").appendChild(card.html);
+        this.tableau.forEach((row) => {
+            row.forEach((card) => {
+                this.board.appendChild(card.html);
             });
         });
     }
@@ -111,22 +130,78 @@ class Game {
             let card2 = this.flipped[1];
 
             if(card1.html.innerHTML == card2.html.innerHTML) {
-                card1.hide();
-                card2.hide();
+                card1.hide(); card2.hide();
 
+                let thisPlayer = this.players[this.currentPlayer];
+                thisPlayer.score++;
+                thisPlayer.tile.innerHTML = `
+                    ${thisPlayer.nickname} ${thisPlayer.score}
+                `;
             } else {
-                card1.flip();
-                card2.flip();
+                card1.flip(); card2.flip();
+
+                this.nextPlayer();
             }
 
             this.flipped.length = 0; // empty the array (source: https://stackoverflow.com/questions/1232040/how-do-i-empty-an-array-in-javascript)
         }
     }
+
+    nextPlayer() {
+        if((this.currentPlayer+1) == this.players.length) {
+            this.currentPlayer = 0;
+        } else {
+            this.currentPlayer++;
+        }
+        this.setActivePlayer();
+    }
+
+    createPlayerZone() {
+        let pzHeight = 32;
+        this.playerZone = document.createElement("div");
+        this.playerZone.style.width = this.width + "px";
+        this.playerZone.style.height = pzHeight + "px";
+        this.playerZone.style.top = (this.height+this.margin) + "px";
+        this.playerZone.style.backgroundColor = "#eee";
+        this.playerZone.style.position = "relative";
+        this.board.appendChild(this.playerZone);
+
+        let ptWidth = 150;
+        let ptFontSize = 21;
+        let ptMargin = pzHeight / 2;
+        this.players.forEach((player, index) => {
+            let background = (index == this.currentPlayer) ? "#000" : "#ccc";
+            player.tile = document.createElement("div");
+            player.tile.style = `
+                background-color: ${background};
+                box-sizing: border-box;
+                color: #fff;
+                height: ${pzHeight}px;
+                font-family: monospace;
+                font-size: ${ptFontSize}px;
+                font-weight: bold;
+                left: ${((index*ptWidth) + ptMargin)}px;
+                line-height: ${pzHeight}px;
+                padding-left: ${(ptFontSize/2)}px;
+                position: absolute;
+                width: ${ptWidth}px;
+            `;
+            player.tile.innerHTML = player.nickname;
+            this.playerZone.appendChild(player.tile);
+        });
+    }
+
+    setActivePlayer() {
+        this.players.forEach((player, index) => {
+            player.tile.style.backgroundColor = (index == this.currentPlayer) ? "#000" : "#ccc";
+        });
+    }
 }
 
 class Player {
     constructor(
-        public nickname: string
+        public nickname: string,
+        public score = 0
     ) {}
 }
 

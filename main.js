@@ -6,11 +6,10 @@ function load() {
 }
 function initialise() {
     var players = [
-        new Player("Mark")
+        new Player("Mark"),
+        new Player("Ste")
     ];
-    var game = new Game(players, "Mark", "Easy");
-    game.createBoard();
-    game.deal();
+    var game = new Game(players, 0, "Medium");
 }
 var Game = /** @class */ (function () {
     function Game(players, currentPlayer, difficulty) {
@@ -24,11 +23,26 @@ var Game = /** @class */ (function () {
         this.margin = 10;
         this.tableau = [];
         this.flipped = [];
+        switch (difficulty) {
+            case "Hard":
+                this.rows = 8;
+                this.columns = 8;
+                break;
+            case "Medium":
+                this.rows = 6;
+                this.columns = 6;
+                break;
+            case "Easy":
+            default:
+                this.rows = 4;
+                this.columns = 4;
+                break;
+        }
         if (difficulty == "Easy") {
             this.rows = 4;
             this.columns = 4;
-            this.totalCards = this.rows * this.columns;
         }
+        this.totalCards = this.rows * this.columns;
         this.aCard = Card.calculateCard({
             width: this.width,
             height: this.height,
@@ -36,6 +50,9 @@ var Game = /** @class */ (function () {
             columns: this.columns,
             rows: this.rows
         });
+        this.createBoard();
+        this.createPlayerZone();
+        this.deal();
     }
     Game.prototype.createBoard = function () {
         this.board = document.createElement('div');
@@ -44,8 +61,9 @@ var Game = /** @class */ (function () {
         document.body.appendChild(this.board);
     };
     Game.prototype.deal = function () {
+        var _this = this;
         var cards = [
-            "🍌", "🍉", "🍇", "🍓", "🍒", "🍑", "🍍", "🥥", "🥝", "🍆", "🥑", "🥦", "🌽", "🥕", "🍠"
+            "🍌", "🍉", "🍇", "🍓", "🍒", "🍑", "🍍", "🥥", "🥝", "🍆", "🥑", "🥦", "🌽", "🥕", "🍠", "🍔", "🍟", "🍕", "🌮", "🥗", "🍣", "🍭", "🍩", "🍿"
         ];
         this.deck = new Deck(cards, this.totalCards);
         var pointer = {
@@ -63,7 +81,7 @@ var Game = /** @class */ (function () {
         }
         this.tableau.forEach(function (row) {
             row.forEach(function (card) {
-                document.getElementById("game-board").appendChild(card.html);
+                _this.board.appendChild(card.html);
             });
         });
     };
@@ -75,19 +93,61 @@ var Game = /** @class */ (function () {
             if (card1.html.innerHTML == card2.html.innerHTML) {
                 card1.hide();
                 card2.hide();
+                var thisPlayer = this.players[this.currentPlayer];
+                thisPlayer.score++;
+                thisPlayer.tile.innerHTML = "\n                    " + thisPlayer.nickname + " " + thisPlayer.score + "\n                ";
             }
             else {
                 card1.flip();
                 card2.flip();
+                this.nextPlayer();
             }
             this.flipped.length = 0; // empty the array (source: https://stackoverflow.com/questions/1232040/how-do-i-empty-an-array-in-javascript)
         }
     };
+    Game.prototype.nextPlayer = function () {
+        if ((this.currentPlayer + 1) == this.players.length) {
+            this.currentPlayer = 0;
+        }
+        else {
+            this.currentPlayer++;
+        }
+        this.setActivePlayer();
+    };
+    Game.prototype.createPlayerZone = function () {
+        var _this = this;
+        var pzHeight = 32;
+        this.playerZone = document.createElement("div");
+        this.playerZone.style.width = this.width + "px";
+        this.playerZone.style.height = pzHeight + "px";
+        this.playerZone.style.top = (this.height + this.margin) + "px";
+        this.playerZone.style.backgroundColor = "#eee";
+        this.playerZone.style.position = "relative";
+        this.board.appendChild(this.playerZone);
+        var ptWidth = 150;
+        var ptFontSize = 21;
+        var ptMargin = pzHeight / 2;
+        this.players.forEach(function (player, index) {
+            var background = (index == _this.currentPlayer) ? "#000" : "#ccc";
+            player.tile = document.createElement("div");
+            player.tile.style = "\n                background-color: " + background + ";\n                box-sizing: border-box;\n                color: #fff;\n                height: " + pzHeight + "px;\n                font-family: monospace;\n                font-size: " + ptFontSize + "px;\n                font-weight: bold;\n                left: " + ((index * ptWidth) + ptMargin) + "px;\n                line-height: " + pzHeight + "px;\n                padding-left: " + (ptFontSize / 2) + "px;\n                position: absolute;\n                width: " + ptWidth + "px;\n            ";
+            player.tile.innerHTML = player.nickname;
+            _this.playerZone.appendChild(player.tile);
+        });
+    };
+    Game.prototype.setActivePlayer = function () {
+        var _this = this;
+        this.players.forEach(function (player, index) {
+            player.tile.style.backgroundColor = (index == _this.currentPlayer) ? "#000" : "#ccc";
+        });
+    };
     return Game;
 }());
 var Player = /** @class */ (function () {
-    function Player(nickname) {
+    function Player(nickname, score) {
+        if (score === void 0) { score = 0; }
         this.nickname = nickname;
+        this.score = score;
     }
     return Player;
 }());

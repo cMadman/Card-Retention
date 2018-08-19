@@ -63,7 +63,7 @@ var Game = /** @class */ (function () {
         }
         this.tableau.forEach(function (row) {
             row.forEach(function (card) {
-                document.getElementById("game-board").appendChild(card.html); // for some reason this.board.appendChild errored, seemed like a scoping issue TODO return this to a reference
+                document.getElementById("game-board").appendChild(card.html);
             });
         });
     };
@@ -73,12 +73,12 @@ var Game = /** @class */ (function () {
             var card1 = this.flipped[0];
             var card2 = this.flipped[1];
             if (card1.html.innerHTML == card2.html.innerHTML) {
-                card1.html.classList.toggle("hidden");
-                card2.html.classList.toggle("hidden");
+                card1.hide();
+                card2.hide();
             }
             else {
-                card1.html.classList.toggle("flip");
-                card2.html.classList.toggle("flip");
+                card1.flip();
+                card2.flip();
             }
             this.flipped.length = 0; // empty the array (source: https://stackoverflow.com/questions/1232040/how-do-i-empty-an-array-in-javascript)
         }
@@ -107,12 +107,21 @@ var Card = /** @class */ (function () {
         this.html.style.position = 'absolute';
         this.html.style.top = top;
         this.html.style.width = width;
-        this.html.addEventListener('click', function () { return _this.flip(); });
+        this.html.addEventListener('click', function () { return _this.click(); });
         this.html.innerHTML = "\n          <div class=\"flipper\">\n            <div class=\"front\"></div>\n            <div class=\"back\">" + content + "</div>\n          </div>\n        ";
     }
-    Card.prototype.flip = function () {
-        this.game.match(this);
+    Card.prototype.click = function () {
+        this.flip(true);
+    };
+    Card.prototype.flip = function (match) {
+        var _this = this;
         this.html.classList.toggle("flip");
+        if (match) {
+            this.html.addEventListener('transitionend', function () { return _this.game.match(_this); }, { once: true });
+        }
+    };
+    Card.prototype.hide = function () {
+        this.html.classList.toggle("hide");
     };
     Card.calculateCard = function (options) {
         var cardWidth = (options.width -
@@ -140,7 +149,6 @@ var Deck = /** @class */ (function () {
         }, []);
         // shuffle
         shuffle(this.cards);
-        console.log(this.cards);
     }
     return Deck;
 }());

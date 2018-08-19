@@ -98,7 +98,7 @@ class Game {
 
         this.tableau.forEach(function(row) {
             row.forEach(function(card) {
-                document.getElementById("game-board").appendChild(card.html); // for some reason this.board.appendChild errored, seemed like a scoping issue TODO return this to a reference
+                document.getElementById("game-board").appendChild(card.html);
             });
         });
     }
@@ -111,12 +111,12 @@ class Game {
             let card2 = this.flipped[1];
 
             if(card1.html.innerHTML == card2.html.innerHTML) {
-                card1.html.classList.toggle("hidden");
-                card2.html.classList.toggle("hidden");
+                card1.hide();
+                card2.hide();
 
             } else {
-                card1.html.classList.toggle("flip");
-                card2.html.classList.toggle("flip");
+                card1.flip();
+                card2.flip();
             }
 
             this.flipped.length = 0; // empty the array (source: https://stackoverflow.com/questions/1232040/how-do-i-empty-an-array-in-javascript)
@@ -148,7 +148,7 @@ class Card {
         this.html.style.position = 'absolute';
         this.html.style.top = top;
         this.html.style.width = width;
-        this.html.addEventListener('click', () => this.flip());
+        this.html.addEventListener('click', () => this.click());
       
         this.html.innerHTML = `
           <div class="flipper">
@@ -158,9 +158,23 @@ class Card {
         `;
     }
 
-    flip() {
-        this.game.match(this);
+    click() {
+        this.flip(true);
+    }
+
+    flip(match?) {
         this.html.classList.toggle("flip");
+        if(match) {
+            this.html.addEventListener(
+                'transitionend',
+                () => this.game.match(this),
+                {once: true}
+            );
+        }
+    }
+
+    hide() {
+        this.html.classList.toggle("hide");
     }
 
     static calculateCard(options) {

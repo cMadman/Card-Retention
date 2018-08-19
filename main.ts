@@ -30,6 +30,7 @@ class Game {
     top = 50;
     margin = 10;
     tableau = [];
+    flipped = [];
 
     constructor(
         public players: Array<any>, 
@@ -79,7 +80,14 @@ class Game {
             this.tableau[row] = [];
         
             for (let col = 0; col < this.columns; col++) {
-              this.tableau[row][col] = new Card(pointer.top,pointer.left,this.aCard.width,this.aCard.height,this.deck.cards.pop());
+              this.tableau[row][col] = new Card(
+                  pointer.top,
+                  pointer.left,
+                  this.aCard.width,
+                  this.aCard.height,
+                  this.deck.cards.pop(),
+                  this
+                );
         
               pointer.left = pointer.left + this.aCard.width + this.margin;
             }
@@ -93,6 +101,26 @@ class Game {
                 document.getElementById("game-board").appendChild(card.html); // for some reason this.board.appendChild errored, seemed like a scoping issue TODO return this to a reference
             });
         });
+    }
+
+    match(card) {
+        this.flipped[this.flipped.length] = card;
+
+        if(this.flipped.length == 2) {
+            let card1 = this.flipped[0];
+            let card2 = this.flipped[1];
+
+            if(card1.html.innerHTML == card2.html.innerHTML) {
+                card1.html.classList.toggle("hidden");
+                card2.html.classList.toggle("hidden");
+
+            } else {
+                card1.html.classList.toggle("flip");
+                card2.html.classList.toggle("flip");
+            }
+
+            this.flipped.length = 0; // empty the array (source: https://stackoverflow.com/questions/1232040/how-do-i-empty-an-array-in-javascript)
+        }
     }
 }
 
@@ -110,7 +138,8 @@ class Card {
         public left: number,
         public width: number,
         public height: number,
-        public content: string
+        public content: string,
+        public game: Game
     ) {
         this.html = document.createElement('div');
         this.html.className = 'flip-container';
@@ -119,7 +148,7 @@ class Card {
         this.html.style.position = 'absolute';
         this.html.style.top = top;
         this.html.style.width = width;
-        this.html.addEventListener('click', this.flip);
+        this.html.addEventListener('click', () => this.flip());
       
         this.html.innerHTML = `
           <div class="flipper">
@@ -130,7 +159,8 @@ class Card {
     }
 
     flip() {
-        this.classList.toggle("flip");  // 'this' is annoying TODO ask Rols about this
+        this.game.match(this);
+        this.html.classList.toggle("flip");
     }
 
     static calculateCard(options) {
@@ -165,7 +195,7 @@ class Deck {
         public size: number
     ) {
         // cut
-        this.cards.slice(0,size/2);
+        this.cards = this.cards.slice(0,(size/2));
 
         // fill
         this.cards = this.cards.reduce(function (res, current, index, array) {

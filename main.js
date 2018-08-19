@@ -23,6 +23,7 @@ var Game = /** @class */ (function () {
         this.top = 50;
         this.margin = 10;
         this.tableau = [];
+        this.flipped = [];
         if (difficulty == "Easy") {
             this.rows = 4;
             this.columns = 4;
@@ -54,7 +55,7 @@ var Game = /** @class */ (function () {
         for (var row = 0; row < this.rows; row++) {
             this.tableau[row] = [];
             for (var col = 0; col < this.columns; col++) {
-                this.tableau[row][col] = new Card(pointer.top, pointer.left, this.aCard.width, this.aCard.height, this.deck.cards.pop());
+                this.tableau[row][col] = new Card(pointer.top, pointer.left, this.aCard.width, this.aCard.height, this.deck.cards.pop(), this);
                 pointer.left = pointer.left + this.aCard.width + this.margin;
             }
             pointer.left = this.margin;
@@ -66,6 +67,22 @@ var Game = /** @class */ (function () {
             });
         });
     };
+    Game.prototype.match = function (card) {
+        this.flipped[this.flipped.length] = card;
+        if (this.flipped.length == 2) {
+            var card1 = this.flipped[0];
+            var card2 = this.flipped[1];
+            if (card1.html.innerHTML == card2.html.innerHTML) {
+                card1.html.classList.toggle("hidden");
+                card2.html.classList.toggle("hidden");
+            }
+            else {
+                card1.html.classList.toggle("flip");
+                card2.html.classList.toggle("flip");
+            }
+            this.flipped.length = 0; // empty the array (source: https://stackoverflow.com/questions/1232040/how-do-i-empty-an-array-in-javascript)
+        }
+    };
     return Game;
 }());
 var Player = /** @class */ (function () {
@@ -75,12 +92,14 @@ var Player = /** @class */ (function () {
     return Player;
 }());
 var Card = /** @class */ (function () {
-    function Card(top, left, width, height, content) {
+    function Card(top, left, width, height, content, game) {
+        var _this = this;
         this.top = top;
         this.left = left;
         this.width = width;
         this.height = height;
         this.content = content;
+        this.game = game;
         this.html = document.createElement('div');
         this.html.className = 'flip-container';
         this.html.style.height = height;
@@ -88,11 +107,12 @@ var Card = /** @class */ (function () {
         this.html.style.position = 'absolute';
         this.html.style.top = top;
         this.html.style.width = width;
-        this.html.addEventListener('click', this.flip);
+        this.html.addEventListener('click', function () { return _this.flip(); });
         this.html.innerHTML = "\n          <div class=\"flipper\">\n            <div class=\"front\"></div>\n            <div class=\"back\">" + content + "</div>\n          </div>\n        ";
     }
     Card.prototype.flip = function () {
-        this.classList.toggle("flip");
+        this.game.match(this);
+        this.html.classList.toggle("flip");
     };
     Card.calculateCard = function (options) {
         var cardWidth = (options.width -
@@ -113,13 +133,14 @@ var Deck = /** @class */ (function () {
         this.cards = cards;
         this.size = size;
         // cut
-        this.cards.slice(0, size / 2);
+        this.cards = this.cards.slice(0, (size / 2));
         // fill
         this.cards = this.cards.reduce(function (res, current, index, array) {
             return res.concat([current, current]);
         }, []);
         // shuffle
         shuffle(this.cards);
+        console.log(this.cards);
     }
     return Deck;
 }());

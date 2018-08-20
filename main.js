@@ -130,7 +130,7 @@ var Game = /** @class */ (function () {
         this.players.forEach(function (player, index) {
             var background = (index == _this.currentPlayer) ? "#000" : "#ccc";
             player.tile = document.createElement("div");
-            player.tile.style = "\n                background-color: " + background + ";\n                box-sizing: border-box;\n                color: #fff;\n                height: " + pzHeight + "px;\n                font-family: monospace;\n                font-size: " + ptFontSize + "px;\n                font-weight: bold;\n                left: " + ((index * ptWidth) + ptMargin) + "px;\n                line-height: " + pzHeight + "px;\n                padding-left: " + (ptFontSize / 2) + "px;\n                position: absolute;\n                width: " + ptWidth + "px;\n            ";
+            player.tile.style = "\n                background-color: " + background + ";\n                box-sizing: border-box;\n                color: #fff;\n                height: " + pzHeight + "px;\n                font-family: monospace;\n                font-size: " + ptFontSize + "px;\n                font-weight: bold;\n                left: " + ((index * ptWidth)) + "px;\n                line-height: " + pzHeight + "px;\n                padding-left: " + (ptFontSize / 2) + "px;\n                position: absolute;\n                width: " + ptWidth + "px;\n            ";
             player.tile.innerHTML = player.nickname;
             _this.playerZone.appendChild(player.tile);
         });

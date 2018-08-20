@@ -180,7 +180,7 @@ class Game {
                 font-family: monospace;
                 font-size: ${ptFontSize}px;
                 font-weight: bold;
-                left: ${((index*ptWidth) + ptMargin)}px;
+                left: ${((index*ptWidth))}px;
                 line-height: ${pzHeight}px;
                 padding-left: ${(ptFontSize/2)}px;
                 position: absolute;

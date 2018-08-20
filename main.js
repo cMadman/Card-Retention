@@ -10,16 +10,21 @@ function initialise() {
         new Player("Ste")
     ];
     var game = new Game(players, 0, "Medium");
+    game.deal();
 }
 var Game = /** @class */ (function () {
     function Game(players, currentPlayer, difficulty) {
         this.players = players;
         this.currentPlayer = currentPlayer;
         this.difficulty = difficulty;
-        this.width = 500;
-        this.height = 500;
-        this.left = 50;
-        this.top = 50;
+        this.clientHeight = document.documentElement.clientHeight;
+        this.clientWidth = document.documentElement.clientWidth;
+        this.viewportMax = ((this.clientHeight > this.clientWidth ? this.clientWidth : this.clientHeight));
+        this.playerZoneHeight = Math.floor(this.viewportMax * 0.15);
+        this.width = this.viewportMax - this.playerZoneHeight;
+        this.height = this.viewportMax - this.playerZoneHeight;
+        this.left = 0;
+        this.top = 0;
         this.margin = 10;
         this.tableau = [];
         this.flipped = [];
@@ -52,7 +57,6 @@ var Game = /** @class */ (function () {
         });
         this.createBoard();
         this.createPlayerZone();
-        this.deal();
     }
     Game.prototype.createBoard = function () {
         this.board = document.createElement('div');
@@ -63,7 +67,7 @@ var Game = /** @class */ (function () {
     Game.prototype.deal = function () {
         var _this = this;
         var cards = [
-            "🍌", "🍉", "🍇", "🍓", "🍒", "🍑", "🍍", "🥥", "🥝", "🍆", "🥑", "🥦", "🌽", "🥕", "🍠", "🍔", "🍟", "🍕", "🌮", "🥗", "🍣", "🍭", "🍩", "🍿"
+            "🍌", "🍉", "🍇", "🍓", "🍒", "🍑", "🍍", "🥥", "🥝", "🍆", "🥑", "🥦", "🌽", "🥕", "🍠", "🍔", "🍟", "🍕", "🌮", "🥗", "🍣", "🍭", "🍩", "🍿", "🍺", "🍾", "🍪", "🍧", "🍸", "🍰", "🍖", "🥓"
         ];
         this.deck = new Deck(cards, this.totalCards);
         var pointer = {
@@ -86,22 +90,23 @@ var Game = /** @class */ (function () {
         });
     };
     Game.prototype.match = function (card) {
+        var thisPlayer = this.players[this.currentPlayer];
         this.flipped[this.flipped.length] = card;
         if (this.flipped.length == 2) {
+            thisPlayer.attempts++;
             var card1 = this.flipped[0];
             var card2 = this.flipped[1];
             if (card1.html.innerHTML == card2.html.innerHTML) {
                 card1.hide();
                 card2.hide();
-                var thisPlayer = this.players[this.currentPlayer];
                 thisPlayer.score++;
-                thisPlayer.tile.innerHTML = "\n                    " + thisPlayer.nickname + " " + thisPlayer.score + "\n                ";
             }
             else {
                 card1.flip();
                 card2.flip();
                 this.nextPlayer();
             }
+            thisPlayer.tile.innerHTML = "\n                " + thisPlayer.nickname + " " + thisPlayer.attempts + ":" + thisPlayer.score + "\n            ";
             this.flipped.length = 0; // empty the array (source: https://stackoverflow.com/questions/1232040/how-do-i-empty-an-array-in-javascript)
         }
     };
@@ -116,21 +121,20 @@ var Game = /** @class */ (function () {
     };
     Game.prototype.createPlayerZone = function () {
         var _this = this;
-        var pzHeight = 32;
         this.playerZone = document.createElement("div");
         this.playerZone.style.width = this.width + "px";
-        this.playerZone.style.height = pzHeight + "px";
+        this.playerZone.style.height = this.playerZoneHeight + "px";
         this.playerZone.style.top = (this.height + this.margin) + "px";
         this.playerZone.style.backgroundColor = "#eee";
         this.playerZone.style.position = "relative";
         this.board.appendChild(this.playerZone);
         var ptWidth = 150;
-        var ptFontSize = 21;
-        var ptMargin = pzHeight / 2;
+        var ptFontSize = Math.floor(this.playerZoneHeight * 0.2);
+        var ptMargin = this.playerZoneHeight / 2;
         this.players.forEach(function (player, index) {
             var background = (index == _this.currentPlayer) ? "#000" : "#ccc";
             player.tile = document.createElement("div");
-            player.tile.style = "\n                background-color: " + background + ";\n                box-sizing: border-box;\n                color: #fff;\n                height: " + pzHeight + "px;\n                font-family: monospace;\n                font-size: " + ptFontSize + "px;\n                font-weight: bold;\n                left: " + ((index * ptWidth)) + "px;\n                line-height: " + pzHeight + "px;\n                padding-left: " + (ptFontSize / 2) + "px;\n                position: absolute;\n                width: " + ptWidth + "px;\n            ";
+            player.tile.style = "\n                background-color: " + background + ";\n                box-sizing: border-box;\n                color: #fff;\n                height: " + _this.playerZoneHeight + "px;\n                font-family: monospace;\n                font-size: " + ptFontSize + "px;\n                font-weight: bold;\n                left: " + ((index * ptWidth)) + "px;\n                padding-left: " + (ptFontSize / 2) + "px;\n                position: absolute;\n                width: " + ptWidth + "px;\n            ";
             player.tile.innerHTML = player.nickname;
             _this.playerZone.appendChild(player.tile);
         });
@@ -144,10 +148,12 @@ var Game = /** @class */ (function () {
     return Game;
 }());
 var Player = /** @class */ (function () {
-    function Player(nickname, score) {
+    function Player(nickname, score, attempts) {
         if (score === void 0) { score = 0; }
+        if (attempts === void 0) { attempts = 0; }
         this.nickname = nickname;
         this.score = score;
+        this.attempts = attempts;
     }
     return Player;
 }());
@@ -168,7 +174,7 @@ var Card = /** @class */ (function () {
         this.html.style.top = top;
         this.html.style.width = width;
         this.html.addEventListener('click', function () { return _this.click(); });
-        this.html.innerHTML = "\n          <div class=\"flipper\">\n            <div class=\"front\"></div>\n            <div class=\"back\">" + content + "</div>\n          </div>\n        ";
+        this.html.innerHTML = "\n          <div class=\"flipper\">\n            <div class=\"front\"></div>\n            <div class=\"back\" style=\"font-size: " + (Math.floor(width * 0.8)) + "px\">" + content + "</div>\n          </div>\n        ";
     }
     Card.prototype.click = function () {
         this.flip(true);

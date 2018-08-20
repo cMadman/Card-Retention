@@ -13,6 +13,7 @@ function initialise() {
   ];
 
   let game = new Game(players,0,"Medium");
+  game.deal();
 }
 
 class Game {
@@ -24,10 +25,14 @@ class Game {
     aCard: any;
     playerZone: any;
 
-    width = 500;
-    height = 500;
-    left = 50;
-    top = 50;
+    clientHeight = document.documentElement.clientHeight;
+    clientWidth = document.documentElement.clientWidth;
+    viewportMax = ((this.clientHeight > this.clientWidth ? this.clientWidth : this.clientHeight));
+    playerZoneHeight = Math.floor(this.viewportMax * 0.15);
+    width = this.viewportMax - this.playerZoneHeight;
+    height = this.viewportMax - this.playerZoneHeight;
+    left = 0;
+    top = 0;
     margin = 10;
     tableau = [];
     flipped = [];
@@ -67,7 +72,6 @@ class Game {
 
         this.createBoard();
         this.createPlayerZone();
-        this.deal();
     }
 
     createBoard() {
@@ -86,7 +90,7 @@ class Game {
 
     deal() {
         let cards = [
-            "🍌","🍉","🍇","🍓","🍒","🍑","🍍","🥥","🥝","🍆","🥑","🥦","🌽","🥕","🍠","🍔","🍟","🍕","🌮","🥗","🍣","🍭","🍩","🍿"
+            "🍌","🍉","🍇","🍓","🍒","🍑","🍍","🥥","🥝","🍆","🥑","🥦","🌽","🥕","🍠","🍔","🍟","🍕","🌮","🥗","🍣","🍭","🍩","🍿","🍺","🍾","🍪","🍧","🍸","🍰","🍖","🥓"
         ]
         this.deck = new Deck(cards,this.totalCards);
         
@@ -120,28 +124,34 @@ class Game {
                 this.board.appendChild(card.html);
             });
         });
+
+
     }
 
     match(card) {
+        let thisPlayer = this.players[this.currentPlayer];
+
         this.flipped[this.flipped.length] = card;
 
         if(this.flipped.length == 2) {
+            thisPlayer.attempts++;
+
             let card1 = this.flipped[0];
             let card2 = this.flipped[1];
 
             if(card1.html.innerHTML == card2.html.innerHTML) {
                 card1.hide(); card2.hide();
 
-                let thisPlayer = this.players[this.currentPlayer];
                 thisPlayer.score++;
-                thisPlayer.tile.innerHTML = `
-                    ${thisPlayer.nickname} ${thisPlayer.score}
-                `;
             } else {
                 card1.flip(); card2.flip();
 
                 this.nextPlayer();
             }
+
+            thisPlayer.tile.innerHTML = `
+                ${thisPlayer.nickname} ${thisPlayer.attempts}:${thisPlayer.score}
+            `;
 
             this.flipped.length = 0; // empty the array (source: https://stackoverflow.com/questions/1232040/how-do-i-empty-an-array-in-javascript)
         }
@@ -157,18 +167,17 @@ class Game {
     }
 
     createPlayerZone() {
-        let pzHeight = 32;
         this.playerZone = document.createElement("div");
         this.playerZone.style.width = this.width + "px";
-        this.playerZone.style.height = pzHeight + "px";
+        this.playerZone.style.height = this.playerZoneHeight + "px";
         this.playerZone.style.top = (this.height+this.margin) + "px";
         this.playerZone.style.backgroundColor = "#eee";
         this.playerZone.style.position = "relative";
         this.board.appendChild(this.playerZone);
 
         let ptWidth = 150;
-        let ptFontSize = 21;
-        let ptMargin = pzHeight / 2;
+        let ptFontSize = Math.floor(this.playerZoneHeight * 0.2);
+        let ptMargin = this.playerZoneHeight / 2;
         this.players.forEach((player, index) => {
             let background = (index == this.currentPlayer) ? "#000" : "#ccc";
             player.tile = document.createElement("div");
@@ -176,12 +185,11 @@ class Game {
                 background-color: ${background};
                 box-sizing: border-box;
                 color: #fff;
-                height: ${pzHeight}px;
+                height: ${this.playerZoneHeight}px;
                 font-family: monospace;
                 font-size: ${ptFontSize}px;
                 font-weight: bold;
                 left: ${((index*ptWidth))}px;
-                line-height: ${pzHeight}px;
                 padding-left: ${(ptFontSize/2)}px;
                 position: absolute;
                 width: ${ptWidth}px;
@@ -201,7 +209,8 @@ class Game {
 class Player {
     constructor(
         public nickname: string,
-        public score = 0
+        public score = 0,
+        public attempts = 0
     ) {}
 }
 
@@ -228,7 +237,7 @@ class Card {
         this.html.innerHTML = `
           <div class="flipper">
             <div class="front"></div>
-            <div class="back">${content}</div>
+            <div class="back" style="font-size: ${(Math.floor(width*0.8))}px">${content}</div>
           </div>
         `;
     }

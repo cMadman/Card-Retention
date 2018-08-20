@@ -50,7 +50,7 @@
 /* back, initially hidden pane */
 .back {
   background-color: #ccf;
-  font-size: 60px;
+  font-size: 8em;
   text-align: center;
   transform: rotateY(180deg);
 }

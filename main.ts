@@ -36,6 +36,15 @@ class Game {
     margin = 10;
     tableau = [];
     flipped = [];
+    color = {
+        floor: "#393059",
+        table: "#393059",
+        cardBorder: "#FABF0C",
+        cardBackground: "#FFEBAD",
+        playerZone: "#393059",
+        playerActive: "#B9A6FF",
+        playerInactive: "#393059"
+    }
 
     constructor(
         public players: Array<any>, 
@@ -57,10 +66,7 @@ class Game {
                 this.columns = 4;
             break;
         }
-        if(difficulty == "Easy") {
-            this.rows = 4;
-            this.columns = 4;
-        }
+
         this.totalCards = this.rows * this.columns;
         this.aCard = Card.calculateCard({
             width: this.width,
@@ -72,13 +78,14 @@ class Game {
 
         this.createBoard();
         this.createPlayerZone();
+        this.setActivePlayer();
     }
 
     createBoard() {
         this.board = document.createElement('div');
         this.board.id = "game-board";
         this.board.style = `
-            background-color: #eee;
+            background-color: ${this.color.floor};
             height: ${this.height};
             left: ${this.left};
             position: relative;
@@ -145,6 +152,7 @@ class Game {
                 thisPlayer.score++;
             } else {
                 card1.flip(); card2.flip();
+                card1.listen(); card2.listen();
 
                 this.nextPlayer();
             }
@@ -168,21 +176,21 @@ class Game {
 
     createPlayerZone() {
         this.playerZone = document.createElement("div");
-        this.playerZone.style.width = this.width + "px";
-        this.playerZone.style.height = this.playerZoneHeight + "px";
-        this.playerZone.style.top = (this.height+this.margin) + "px";
-        this.playerZone.style.backgroundColor = "#eee";
-        this.playerZone.style.position = "relative";
+        this.playerZone.style = `
+            background-color: ${this.color.playerZone};
+            height: ${this.playerZoneHeight}px;
+            position: relative;
+            top: ${(this.height+this.margin)}px;
+            width: ${this.width}px;
+        `;
         this.board.appendChild(this.playerZone);
 
         let ptWidth = 150;
         let ptFontSize = Math.floor(this.playerZoneHeight * 0.2);
         let ptMargin = this.playerZoneHeight / 2;
         this.players.forEach((player, index) => {
-            let background = (index == this.currentPlayer) ? "#000" : "#ccc";
             player.tile = document.createElement("div");
             player.tile.style = `
-                background-color: ${background};
                 box-sizing: border-box;
                 color: #fff;
                 height: ${this.playerZoneHeight}px;
@@ -201,7 +209,7 @@ class Game {
 
     setActivePlayer() {
         this.players.forEach((player, index) => {
-            player.tile.style.backgroundColor = (index == this.currentPlayer) ? "#000" : "#ccc";
+            player.tile.style.backgroundColor = (index == this.currentPlayer) ? this.color.playerActive : this.color.playerInactive;
         });
     }
 }
@@ -227,12 +235,14 @@ class Card {
     ) {
         this.html = document.createElement('div');
         this.html.className = 'flip-container';
-        this.html.style.height = height;
-        this.html.style.left = left;
-        this.html.style.position = 'absolute';
-        this.html.style.top = top;
-        this.html.style.width = width;
-        this.html.addEventListener('click', () => this.click());
+        this.html.style = `
+            height: ${height}px;
+            left: ${left}px;
+            position: absolute;
+            top: ${top}px;
+            width: ${width}px;
+        `;
+        this.listen();
       
         this.html.innerHTML = `
           <div class="flipper">
@@ -242,12 +252,32 @@ class Card {
         `;
     }
 
-    click() {
+    handleEvent(evt) {
+        switch(evt.type) {
+            case "click":
+                this.click(evt);
+                break;
+            default:
+                return;
+        }
+    }
+
+    listen() {
+        this.html.addEventListener('click', this, {once: true});
+    }
+
+    deafen() {
+        this.html.removeEventListener('click', this, {once: true});
+    }
+
+    click(evt) {
+        this.deafen();
         this.flip(true);
     }
 
     flip(match?) {
         this.html.classList.toggle("flip");
+
         if(match) {
             this.html.addEventListener(
                 'transitionend',

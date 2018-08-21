@@ -172,7 +172,7 @@ var Card = /** @class */ (function () {
         this.html.className = 'flip-container';
         this.html.style = "\n            height: " + height + "px;\n            left: " + left + "px;\n            position: absolute;\n            top: " + top + "px;\n            width: " + width + "px;\n        ";
         this.listen();
-        this.html.innerHTML = "\n          <div class=\"flipper\">\n            <div class=\"front\"></div>\n            <div class=\"back\" style=\"font-size: " + (Math.floor(width * 0.8)) + "px\">" + content + "</div>\n          </div>\n        ";
+        this.html.innerHTML = "\n          <div class=\"flipper\">\n            <div class=\"front\"></div>\n            <div class=\"back\" style=\"\n                font-size: " + (Math.floor(width * 0.7)) + "px;\n            \">" + content + "</div>\n          </div>\n        ";
     }
     Card.prototype.handleEvent = function (evt) {
         switch (evt.type) {

@@ -247,7 +247,9 @@ class Card {
         this.html.innerHTML = `
           <div class="flipper">
             <div class="front"></div>
-            <div class="back" style="font-size: ${(Math.floor(width*0.8))}px">${content}</div>
+            <div class="back" style="
+                font-size: ${(Math.floor(width*0.7))}px;
+            ">${content}</div>
           </div>
         `;
     }

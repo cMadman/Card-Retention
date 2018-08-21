@@ -34,6 +34,12 @@
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 
+  border-radius: 10px;
+  border: 5px solid #FFEBAD;
+  background-color: #FABF0C;
+
+  box-sizing: border-box;
+
   position: absolute;
   top: 0;
   left: 0;
@@ -44,12 +50,13 @@
   z-index: 2;
   /* for firefox 31 */
   transform: rotateY(0deg);
-  background-color: #efe;
+  background-color: tan;
 }
 
 /* back, initially hidden pane */
 .back {
   background-color: #ccf;
+  border-color: #ccf;
   font-size: 8em;
   text-align: center;
   transform: rotateY(180deg);

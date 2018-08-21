@@ -28,6 +28,15 @@ var Game = /** @class */ (function () {
         this.margin = 10;
         this.tableau = [];
         this.flipped = [];
+        this.color = {
+            floor: "#393059",
+            table: "#393059",
+            cardBorder: "#FABF0C",
+            cardBackground: "#FFEBAD",
+            playerZone: "#393059",
+            playerActive: "#B9A6FF",
+            playerInactive: "#393059"
+        };
         switch (difficulty) {
             case "Hard":
                 this.rows = 8;
@@ -43,10 +52,6 @@ var Game = /** @class */ (function () {
                 this.columns = 4;
                 break;
         }
-        if (difficulty == "Easy") {
-            this.rows = 4;
-            this.columns = 4;
-        }
         this.totalCards = this.rows * this.columns;
         this.aCard = Card.calculateCard({
             width: this.width,
@@ -57,11 +62,12 @@ var Game = /** @class */ (function () {
         });
         this.createBoard();
         this.createPlayerZone();
+        this.setActivePlayer();
     }
     Game.prototype.createBoard = function () {
         this.board = document.createElement('div');
         this.board.id = "game-board";
-        this.board.style = "\n            background-color: #eee;\n            height: " + this.height + ";\n            left: " + this.left + ";\n            position: relative;\n            top: " + this.top + ";\n            width: " + this.width + ";\n        ";
+        this.board.style = "\n            background-color: " + this.color.floor + ";\n            height: " + this.height + ";\n            left: " + this.left + ";\n            position: relative;\n            top: " + this.top + ";\n            width: " + this.width + ";\n        ";
         document.body.appendChild(this.board);
     };
     Game.prototype.deal = function () {
@@ -104,6 +110,8 @@ var Game = /** @class */ (function () {
             else {
                 card1.flip();
                 card2.flip();
+                card1.listen();
+                card2.listen();
                 this.nextPlayer();
             }
             thisPlayer.tile.innerHTML = "\n                " + thisPlayer.nickname + " " + thisPlayer.attempts + ":" + thisPlayer.score + "\n            ";
@@ -122,19 +130,14 @@ var Game = /** @class */ (function () {
     Game.prototype.createPlayerZone = function () {
         var _this = this;
         this.playerZone = document.createElement("div");
-        this.playerZone.style.width = this.width + "px";
-        this.playerZone.style.height = this.playerZoneHeight + "px";
-        this.playerZone.style.top = (this.height + this.margin) + "px";
-        this.playerZone.style.backgroundColor = "#eee";
-        this.playerZone.style.position = "relative";
+        this.playerZone.style = "\n            background-color: " + this.color.playerZone + ";\n            height: " + this.playerZoneHeight + "px;\n            position: relative;\n            top: " + (this.height + this.margin) + "px;\n            width: " + this.width + "px;\n        ";
         this.board.appendChild(this.playerZone);
         var ptWidth = 150;
         var ptFontSize = Math.floor(this.playerZoneHeight * 0.2);
         var ptMargin = this.playerZoneHeight / 2;
         this.players.forEach(function (player, index) {
-            var background = (index == _this.currentPlayer) ? "#000" : "#ccc";
             player.tile = document.createElement("div");
-            player.tile.style = "\n                background-color: " + background + ";\n                box-sizing: border-box;\n                color: #fff;\n                height: " + _this.playerZoneHeight + "px;\n                font-family: monospace;\n                font-size: " + ptFontSize + "px;\n                font-weight: bold;\n                left: " + ((index * ptWidth)) + "px;\n                padding-left: " + (ptFontSize / 2) + "px;\n                position: absolute;\n                width: " + ptWidth + "px;\n            ";
+            player.tile.style = "\n                box-sizing: border-box;\n                color: #fff;\n                height: " + _this.playerZoneHeight + "px;\n                font-family: monospace;\n                font-size: " + ptFontSize + "px;\n                font-weight: bold;\n                left: " + ((index * ptWidth)) + "px;\n                padding-left: " + (ptFontSize / 2) + "px;\n                position: absolute;\n                width: " + ptWidth + "px;\n            ";
             player.tile.innerHTML = player.nickname;
             _this.playerZone.appendChild(player.tile);
         });
@@ -142,7 +145,7 @@ var Game = /** @class */ (function () {
     Game.prototype.setActivePlayer = function () {
         var _this = this;
         this.players.forEach(function (player, index) {
-            player.tile.style.backgroundColor = (index == _this.currentPlayer) ? "#000" : "#ccc";
+            player.tile.style.backgroundColor = (index == _this.currentPlayer) ? _this.color.playerActive : _this.color.playerInactive;
         });
     };
     return Game;
@@ -159,7 +162,6 @@ var Player = /** @class */ (function () {
 }());
 var Card = /** @class */ (function () {
     function Card(top, left, width, height, content, game) {
-        var _this = this;
         this.top = top;
         this.left = left;
         this.width = width;
@@ -168,15 +170,27 @@ var Card = /** @class */ (function () {
         this.game = game;
         this.html = document.createElement('div');
         this.html.className = 'flip-container';
-        this.html.style.height = height;
-        this.html.style.left = left;
-        this.html.style.position = 'absolute';
-        this.html.style.top = top;
-        this.html.style.width = width;
-        this.html.addEventListener('click', function () { return _this.click(); });
+        this.html.style = "\n            height: " + height + "px;\n            left: " + left + "px;\n            position: absolute;\n            top: " + top + "px;\n            width: " + width + "px;\n        ";
+        this.listen();
         this.html.innerHTML = "\n          <div class=\"flipper\">\n            <div class=\"front\"></div>\n            <div class=\"back\" style=\"font-size: " + (Math.floor(width * 0.8)) + "px\">" + content + "</div>\n          </div>\n        ";
     }
-    Card.prototype.click = function () {
+    Card.prototype.handleEvent = function (evt) {
+        switch (evt.type) {
+            case "click":
+                this.click(evt);
+                break;
+            default:
+                return;
+        }
+    };
+    Card.prototype.listen = function () {
+        this.html.addEventListener('click', this, { once: true });
+    };
+    Card.prototype.deafen = function () {
+        this.html.removeEventListener('click', this, { once: true });
+    };
+    Card.prototype.click = function (evt) {
+        this.deafen();
         this.flip(true);
     };
     Card.prototype.flip = function (match) {

@@ -6,8 +6,9 @@ function load() {
 }
 function initialise() {
     var players = [
+        new Player("Ant"),
         new Player("Mark"),
-        new Player("Ste")
+        new Player("Matt")
     ];
     var game = new Game(players, 0, "Medium");
     game.deal();
@@ -132,7 +133,7 @@ var Game = /** @class */ (function () {
         this.playerZone = document.createElement("div");
         this.playerZone.style = "\n            background-color: " + this.color.playerZone + ";\n            height: " + this.playerZoneHeight + "px;\n            position: relative;\n            top: " + (this.height + this.margin) + "px;\n            width: " + this.width + "px;\n        ";
         this.board.appendChild(this.playerZone);
-        var ptWidth = 150;
+        var ptWidth = (this.width / this.players.length);
         var ptFontSize = Math.floor(this.playerZoneHeight * 0.2);
         var ptMargin = this.playerZoneHeight / 2;
         this.players.forEach(function (player, index) {
@@ -172,7 +173,7 @@ var Card = /** @class */ (function () {
         this.html.className = 'flip-container';
         this.html.style = "\n            height: " + height + "px;\n            left: " + left + "px;\n            position: absolute;\n            top: " + top + "px;\n            width: " + width + "px;\n        ";
         this.listen();
-        this.html.innerHTML = "\n          <div class=\"flipper\">\n            <div class=\"front\"></div>\n            <div class=\"back\" style=\"\n                font-size: " + (Math.floor(width * 0.7)) + "px;\n            \">" + content + "</div>\n          </div>\n        ";
+        this.html.innerHTML = "\n          <div class=\"flipper\">\n            <div class=\"front\"></div>\n            <div class=\"back\" style=\"\n                font-size: " + (Math.floor(width * 0.7)) + "px;\n                line-height: " + (Math.floor(width * 0.7)) + "px;\n            \">" + content + "</div>\n          </div>\n        ";
     }
     Card.prototype.handleEvent = function (evt) {
         switch (evt.type) {

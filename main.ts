@@ -8,8 +8,9 @@ function load() {
 
 function initialise() {
   let players = [
+    new Player("Ant"),
     new Player("Mark"),
-    new Player("Ste")
+    new Player("Matt")
   ];
 
   let game = new Game(players,0,"Medium");
@@ -185,7 +186,7 @@ class Game {
         `;
         this.board.appendChild(this.playerZone);
 
-        let ptWidth = 150;
+        let ptWidth = (this.width / this.players.length);
         let ptFontSize = Math.floor(this.playerZoneHeight * 0.2);
         let ptMargin = this.playerZoneHeight / 2;
         this.players.forEach((player, index) => {
@@ -249,6 +250,7 @@ class Card {
             <div class="front"></div>
             <div class="back" style="
                 font-size: ${(Math.floor(width*0.7))}px;
+                line-height: ${(Math.floor(width*0.7))}px;
             ">${content}</div>
           </div>
         `;

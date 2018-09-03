@@ -1,0 +1,96 @@
+<html>
+    <head>
+        <style type="text/css">
+            body {
+                background-color: #666;
+                font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+                font-size: 18px;
+                color: #333;
+            }
+            .menu {
+                background-color: #ccc;
+            }
+            .difficulty_select {
+                background-color: #fff;
+                box-sizing: border-box;
+                float: left;
+                padding: 1em;
+                text-align: center;
+                width: 33%;
+            }
+            .difficulty_select:hover {
+                background-color: #ece;
+            }
+            .difficulty_select input, .difficulty_select > label {
+                display: block;
+                margin: auto;
+            }
+            .difficulty_select input {
+                margin-top: 0.5em;
+            }
+            .difficulty_select > label:checked {
+                background-color: #cec;
+            }
+            .group:after {
+                content: "";
+                display: table;
+                clear: both;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="menu">
+            <div class="difficulty group">
+                <div class="difficulty_select">
+                    <label for="difficulty_easy">
+                        Easy
+                        <input
+                            id="difficulty_easy"
+                            name="difficulty"
+                            type="radio"
+                            value="easy"
+                        >
+                    </label>
+                </div>
+                <div class="difficulty_select">
+                    <label for="difficulty_medium">
+                        Medium
+                        <input
+                            id="difficulty_medium"
+                            name="difficulty"
+                            type="radio"
+                            value="medium"
+                        >
+                    </label>
+                </div>
+                <div class="difficulty_select">
+                    <label for="difficulty_hard">
+                        Hard
+                        <input
+                            id="difficulty_hard"
+                            name="difficulty"
+                            type="radio"
+                            value="hard"
+                        >
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="players">
+            <div class="player">
+                <div class="avatars">
+                    avatar
+                </div>
+                <div class="name">
+                    name
+                </div>
+                <div class="remove">
+                    X
+                </div>
+            </div>
+            <button class="add">
+                Add Player
+            </button>
+        </div>
+    </body>
+</html>
